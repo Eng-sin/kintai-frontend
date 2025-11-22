@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { useEffect} from "react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
 
   const [message,setMessage] = useState("");
   const [status,setStatus] = useState<any>(null);
+  const [token,setToken] = useState<string | null>(null);
 
   const handleCheckIn = async () =>{
     setMessage("");
@@ -14,8 +16,11 @@ export default function Home() {
     try{
       const res = await fetch("http://localhost:8080/api/attendance/check-in",{
       method: "POST",
-      headers: {"Content-Type" : "application/json"},
-      body: JSON.stringify({userId:1}),
+      headers: 
+      {
+        "Content-Type" : "application/json",
+        "Authorization" : `Bearer ${token}`,
+      },
       })
 
       if(!res.ok){
@@ -34,8 +39,11 @@ export default function Home() {
     try{
       const res = await fetch("http://localhost:8080/api/attendance/check-out",{
       method: "POST",
-      headers: {"Content-Type" : "application/json"},
-      body: JSON.stringify({userId:1}),
+      headers: 
+      {
+        "Content-Type" : "application/json",
+        "Authorization" : `Bearer ${token}`,
+      },
       });
 
       if(!res.ok){
@@ -56,8 +64,11 @@ export default function Home() {
     try{
       const res = await fetch("http://localhost:8080/api/attendance/break/start",{
       method: "POST",
-      headers: {"Content-Type" : "application/json"},
-      body: JSON.stringify({userId:1}),
+      headers: 
+      {
+        "Content-Type" : "application/json",
+        "Authorization" : `Bearer ${token}`,
+      },
       })
 
       if(!res.ok){
@@ -77,8 +88,11 @@ export default function Home() {
     try{
       const res = await fetch("http://localhost:8080/api/attendance/break/end",{
       method: "POST",
-      headers: {"Content-Type" : "application/json"},
-      body: JSON.stringify({userId:1}),
+      headers: 
+      {
+        "Content-Type" : "application/json",
+        "Authorization" : `Bearer ${token}`,
+      },
       })
 
       if(!res.ok){
@@ -97,8 +111,11 @@ export default function Home() {
       try{
         const res = await fetch("http://localhost:8080/api/attendance/status",{
           method: "POST",
-          headers: {"Content-Type" : "application/json"},
-          body: JSON.stringify({userId:1}),
+        headers: 
+        {
+          "Content-Type" : "application/json",
+          "Authorization" : `Bearer ${token}`,
+        },
         });
         if(!res.ok){
           const err = await res.json();
@@ -121,9 +138,21 @@ export default function Home() {
     "ABSENT" : "欠勤",
   };
   
+  const router = useRouter();
   useEffect(() => {
-    getStatus();
+    const t = localStorage.getItem("token");
+    if (!t){
+      router.push("/login");
+    }else{
+      setToken(t); 
+    }
   },[]);
+
+  useEffect(() => {
+    if(token){
+      getStatus();
+    }
+  },[token]);
   return (
     <div>
       {message && (
